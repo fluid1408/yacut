@@ -7,11 +7,11 @@ from flask import url_for
 from .error_handlers import InvalidAPIUsage
 from .const import (
     PATTERN,
-    PATTERN_FOR_GEN_URK,
-    DICT_LABELS,
+    PATTERN_FOR_GEN_URL,
+    LABELS,
     NAME_TAKEN_MESSAGE_FIRST_PATH,
     NAME_TAKEN_MESSAGE_SECOND_PATH,
-    NOT_CORREKR_BODY_MESSAGE
+    NOT_CORRECT_BODY_MESSAGE
 )
 from . import db
 
@@ -32,9 +32,7 @@ class URLMap(db.Model):
 
     @staticmethod
     def character_check(short_link):
-        if re.match(PATTERN, short_link) is None:
-            return False
-        return True
+        return short_link
 
     @staticmethod
     def check_short_id_on_unique(short_link):
@@ -44,7 +42,7 @@ class URLMap(db.Model):
 
     @staticmethod
     def get_unique_short_id():
-        short_link = ''.join(random.choice(PATTERN_FOR_GEN_URK) for _ in range(6))
+        short_link = ''.join(random.choice(PATTERN_FOR_GEN_URL) for _ in range(6))
         if not URLMap.check_short_id_on_unique(short_link):
             raise InvalidAPIUsage('Число подменных url достигла ')
         return short_link
@@ -59,10 +57,10 @@ class URLMap(db.Model):
             if custom_id == '' or custom_id is None:
                 data['custom_id'] = URLMap.get_unique_short_id()
             elif not re.match(PATTERN, custom_id):
-                raise InvalidAPIUsage(NOT_CORREKR_BODY_MESSAGE)
+                raise InvalidAPIUsage(NOT_CORRECT_BODY_MESSAGE)
         else:
             data['custom_id'] = URLMap.get_unique_short_id()
-        for field_db, field_inp in DICT_LABELS.items():
+        for field_db, field_inp in LABELS.items():
             if field_inp in data:
                 setattr(instance, field_db, data[field_inp])
         return instance
