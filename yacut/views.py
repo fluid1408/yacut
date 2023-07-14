@@ -1,37 +1,49 @@
-from flask import render_template, flash, redirect
+import random
 
-from yacut import app, db
-from .forms import UrlForm
+from flask import flash, redirect, render_template
+
+from . import app, db
+from .forms import URLMapForm
 from .models import URLMap
-from .const import NOT_CORRECT_BODY_MESSAGE
+from .const import ALLOWEED_SYMBOLS, LEN_OF_SHORT_ID
+
+
+def check_unique_short_id(short_id):
+    if URLMap.query.filter_by(short=short_id).first() is None:
+        return True
+    return False
+
+
+def get_unique_short_id():
+    short_id = ''.join(random.choice(
+        ALLOWEED_SYMBOLS) for i in range(LEN_OF_SHORT_ID))
+    if check_unique_short_id(short_id):
+        return short_id
+    return get_unique_short_id(), 201
 
 
 @app.route('/', methods=['GET', 'POST'])
-def index_view():
-    url = URLMap()
-    form = UrlForm()
+def main_view():
+    form = URLMapForm()
     if not form.validate_on_submit():
-        return render_template('urls.html', form=form)
-    short_link = form.custom_id.data
-    if not short_link:
-        short_link = url.get_unique_short_id()
-    if not url.check_short_id_on_unique(short_link):
-        flash(f'Имя {short_link} уже занято!', 'link-taken')
-        return render_template('urls.html', form=form)
-    if not url.character_check(short_link):
-        flash(NOT_CORRECT_BODY_MESSAGE, 'link-taken')
-        return render_template('urls.html', form=form)
-    new_url = URLMap(
+        return render_template('main_page.html', form=form)
+    custom_id = form.custom_id.data
+    if not custom_id:
+        custom_id = get_unique_short_id()
+    elif not check_unique_short_id(custom_id):
+        flash(f'Имя {custom_id} уже занято!', 'link-taken')
+        return render_template('main_page.html', form=form)
+    url_map = URLMap(
         original=form.original_link.data,
-        short=short_link
+        short=custom_id
     )
-    db.session.add(new_url)
+    db.session.add(url_map)
     db.session.commit()
-    return render_template('urls.html', url=new_url, form=form)
+    return render_template('main_page.html', url=url_map, form=form)
 
 
 @app.route('/<short_id>')
 def follow_link(short_id):
-    db_object = URLMap.get_or_404(short_id)
-    original_link = db_object.original
+    object_in_db = URLMap.query.filter_by(short=short_id).first_or_404()
+    original_link = object_in_db.original
     return redirect(original_link)
