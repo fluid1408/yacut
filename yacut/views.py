@@ -6,20 +6,8 @@ from . import app, db
 from .forms import URLMapForm
 from .models import URLMap
 from .const import ALLOWEED_SYMBOLS, LEN_OF_SHORT_ID
+from .models import check_unique_short_id, get_unique_short_id
 
-
-def check_unique_short_id(short_id):
-    if URLMap.query.filter_by(short=short_id).first() is None:
-        return True
-    return False
-
-
-def get_unique_short_id():
-    short_id = ''.join(random.choice(
-        ALLOWEED_SYMBOLS) for i in range(LEN_OF_SHORT_ID))
-    if check_unique_short_id(short_id):
-        return short_id
-    return get_unique_short_id(), 201
 
 
 @app.route('/', methods=['GET', 'POST'])

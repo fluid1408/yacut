@@ -1,12 +1,10 @@
-import re
 from http import HTTPStatus
+
 from flask import jsonify, request
 
-from . import app, db
+from . import app
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
-from .views import check_unique_short_id, get_unique_short_id
-from .const import PATTERN
 
 
 @app.route('/api/id/<short_id>/', methods=['GET'])
@@ -19,25 +17,12 @@ def get_url(short_id):
 
 
 @app.route('/api/id/', methods=['POST'])
-def add_url():
+def create_short_link():
     data = request.get_json()
-    if not data:
+    if type(data) != dict:
         raise InvalidAPIUsage('Отсутствует тело запроса')
     if 'url' not in data:
         raise InvalidAPIUsage('\"url\" является обязательным полем!')
-    if 'custom_id' in data:
-        custom_id = data.get('custom_id')
-        if not check_unique_short_id(custom_id):
-            raise InvalidAPIUsage(f'Имя "{custom_id}" уже занято.')
-        if not custom_id:
-            data['custom_id'] = get_unique_short_id()
-        elif not re.match(PATTERN, custom_id):
-            raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
-    else:
-        data['custom_id'] = get_unique_short_id()
-
-    new_url = URLMap()
-    new_url.from_dict(data)
-    db.session.add(new_url)
-    db.session.commit()
-    return jsonify(new_url.to_dict()), HTTPStatus.CREATED
+    url_map = URLMap.from_dict(data)
+    url_map.save(data)
+    return jsonify(url_map.to_dict()), HTTPStatus.CREATED
