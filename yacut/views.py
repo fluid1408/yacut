@@ -1,13 +1,9 @@
-import random
-
 from flask import flash, redirect, render_template
 
 from . import app, db
 from .forms import URLMapForm
 from .models import URLMap
-from .const import ALLOWEED_SYMBOLS, LEN_OF_SHORT_ID
 from .models import check_unique_short_id, get_unique_short_id
-
 
 
 @app.route('/', methods=['GET', 'POST'])
