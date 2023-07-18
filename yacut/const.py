@@ -1,4 +1,3 @@
-import string
 from string import ascii_letters, digits
 
 PATTERN = r'^[a-zA-Z\d]{1,16}$'

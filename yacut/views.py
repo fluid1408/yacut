@@ -1,6 +1,6 @@
 from flask import flash, redirect, render_template
 
-from . import app, db
+from . import app
 from .forms import URLMapForm
 from .models import URLMap
 from .models import check_unique_short_id, get_unique_short_id
