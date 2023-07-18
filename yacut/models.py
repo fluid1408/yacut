@@ -31,14 +31,11 @@ class URLMap(db.Model):
                 setattr(instance, field_key, data[field_item])
         return instance
 
-    def save(self, data):
-        if 'custom_id' in data and data['custom_id'] != '' and data['custom_id'] is not None:
-            custom_id = data.get('custom_id')
-            if not check_unique_short_id(custom_id):
-                raise InvalidAPIUsage(f'Имя "{custom_id}" уже занято.')
-            if custom_id == '' or custom_id is None:
-                data['custom_id'] = get_unique_short_id()
-            elif not re.match(PATTERN, custom_id):
+    def save(self):
+        if self.short != '' and self.short is not None:
+            if not check_unique_short_id(self.short):
+                raise InvalidAPIUsage(f'Имя "{self.short}" уже занято.')
+            elif not re.match(PATTERN, self.short):
                 raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
         else:
             self.short = get_unique_short_id()
@@ -47,9 +44,7 @@ class URLMap(db.Model):
 
 
 def check_unique_short_id(short_link):
-    if URLMap.query.filter_by(short=short_link).first() is None:
-        return True
-    return False
+    return URLMap.query.filter_by(short=short_link).first() is None
 
 
 def get_unique_short_id():

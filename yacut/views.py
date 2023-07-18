@@ -21,8 +21,7 @@ def main_view():
         original=form.original_link.data,
         short=custom_id
     )
-    db.session.add(url_map)
-    db.session.commit()
+    url_map.save()
     return render_template('main_page.html', url=url_map, form=form)
 
 
