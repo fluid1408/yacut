@@ -1,9 +1,10 @@
+import random
 import re
 from datetime import datetime
 from urllib.parse import urljoin
 
 from flask import url_for
-import random
+
 from . import db
 from .const import LABELS, PATTERN, PATTERN_FOR_GEN_URL
 from .error_handlers import InvalidAPIUsage
@@ -32,7 +33,7 @@ class URLMap(db.Model):
         return instance
 
     def save(self):
-        if self.short != '' and self.short is not None:
+        if self.short:
             if not check_unique_short_id(self.short):
                 raise InvalidAPIUsage(f'Имя "{self.short}" уже занято.')
             elif not re.match(PATTERN, self.short):
