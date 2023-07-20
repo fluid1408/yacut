@@ -1,12 +1,12 @@
-from http import HTTPStatus
 import re
+from http import HTTPStatus
+
 from flask import jsonify, request
 
 from . import app
-from .error_handlers import InvalidAPIUsage
-from .models import URLMap
-from .models import check_unique_short_id, get_unique_short_id
 from .const import PATTERN
+from .error_handlers import InvalidAPIUsage
+from .models import URLMap, check_unique_short_id, get_unique_short_id
 
 
 @app.route('/api/id/<short_id>/', methods=['GET'])
