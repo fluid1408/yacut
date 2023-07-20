@@ -33,13 +33,6 @@ class URLMap(db.Model):
         return instance
 
     def save(self):
-        if self.short:
-            if not check_unique_short_id(self.short):
-                raise InvalidAPIUsage(f'Имя "{self.short}" уже занято.')
-            elif not re.match(PATTERN, self.short):
-                raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
-        else:
-            self.short = get_unique_short_id()
         db.session.add(self)
         db.session.commit()
 
