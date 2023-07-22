@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 from urllib.parse import urljoin
 
-from flask import flash, redirect, render_template, url_for
+from flask import url_for
 
 from . import db
 from .const import LABELS, PATTERN, PATTERN_FOR_GEN_URL

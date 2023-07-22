@@ -14,7 +14,9 @@ def get_url(short_id):
         raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
     return jsonify({'url': url_map_obj.original}), HTTPStatus.OK
 
+
 """По ТЗ необходим именно такой эндпоинт"""
+
 
 @app.route('/api/id/', methods=['POST'])
 def create_short_link():
