@@ -1,12 +1,14 @@
 import random
+import re
 from datetime import datetime
 from urllib.parse import urljoin
 
-from flask import url_for
+from flask import flash, redirect, render_template, url_for
 
 from . import db
-from .const import LABELS, PATTERN_FOR_GEN_URL
+from .const import LABELS, PATTERN, PATTERN_FOR_GEN_URL
 from .error_handlers import InvalidAPIUsage
+from .forms import URLMapForm
 
 
 class URLMap(db.Model):
@@ -32,8 +34,21 @@ class URLMap(db.Model):
         return instance
 
     def save(self):
+        if self.short:
+            if not check_unique_short_id(self.short):
+                raise InvalidAPIUsage(f'Имя "{self.short}" уже занято.')
+            elif not re.match(PATTERN, self.short):
+                raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
+        else:
+            self.short = get_unique_short_id()
         db.session.add(self)
         db.session.commit()
+
+    def validate_unique_short_id(self):
+        form = URLMapForm()
+        custom_id = form.custom_id.data
+        if not check_unique_short_id(custom_id):
+            return True
 
 
 def check_unique_short_id(short_link):

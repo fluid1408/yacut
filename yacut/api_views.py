@@ -1,12 +1,10 @@
-import re
 from http import HTTPStatus
 
 from flask import jsonify, request
 
 from . import app
-from .const import PATTERN
 from .error_handlers import InvalidAPIUsage
-from .models import URLMap, check_unique_short_id, get_unique_short_id
+from .models import URLMap
 
 
 @app.route('/api/id/<short_id>/', methods=['GET'])
@@ -16,27 +14,15 @@ def get_url(short_id):
         raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
     return jsonify({'url': url_map_obj.original}), HTTPStatus.OK
 
-
 """По ТЗ необходим именно такой эндпоинт"""
-
 
 @app.route('/api/id/', methods=['POST'])
 def create_short_link():
     data = request.get_json()
-    if not data:
+    if not isinstance(data, dict):
         raise InvalidAPIUsage('Отсутствует тело запроса')
     if 'url' not in data:
         raise InvalidAPIUsage('\"url\" является обязательным полем!')
-    if 'custom_id' in data:
-        custom_id = data.get('custom_id')
-        if not check_unique_short_id(custom_id):
-            raise InvalidAPIUsage(f'Имя "{custom_id}" уже занято.')
-        if not custom_id:
-            data['custom_id'] = get_unique_short_id()
-        elif not re.match(PATTERN, custom_id):
-            raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
-    else:
-        data['custom_id'] = get_unique_short_id()
     url_map = URLMap.from_dict(data)
     url_map.save()
     return jsonify(url_map.to_dict()), HTTPStatus.CREATED
