@@ -8,7 +8,6 @@ from flask import url_for
 from . import db
 from .const import LABELS, PATTERN, PATTERN_FOR_GEN_URL
 from .error_handlers import InvalidAPIUsage
-from .forms import URLMapForm
 
 
 class URLMap(db.Model):
@@ -43,15 +42,6 @@ class URLMap(db.Model):
             self.short = get_unique_short_id()
         db.session.add(self)
         db.session.commit()
-
-    def check_unique_short_id(short_link):
-        return URLMap.query.filter_by(short=short_link).first() is None
-
-    def validate_unique_short_id(self):
-        form = URLMapForm()
-        custom_id = form.custom_id.data
-        if not check_unique_short_id(custom_id):
-            return True
 
 
 def check_unique_short_id(short_link):
