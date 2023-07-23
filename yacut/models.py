@@ -44,10 +44,13 @@ class URLMap(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def check_unique_short_id(short_link):
+        return URLMap.query.filter_by(short=short_link).first() is None
+
     def validate_unique_short_id(self):
-        form = URLMapForm()
-        custom_id = form.custom_id.data
-        if not check_unique_short_id(custom_id):
+        form = URLMapForm() 
+        custom_id = form.custom_id.data 
+        if not check_unique_short_id(custom_id): 
             return True
 
 

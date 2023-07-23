@@ -1,6 +1,7 @@
 from flask import flash, redirect, render_template
 
 from . import app
+from .error_handlers import InvalidAPIUsage
 from .forms import URLMapForm
 from .models import URLMap
 
@@ -15,10 +16,10 @@ def main_view():
         original=form.original_link.data,
         short=custom_id
     )
-    if url_map.validate_unique_short_id():
+    try:
+        url_map.save()
+    except InvalidAPIUsage:
         flash(f'Имя {custom_id} уже занято!', 'link-taken')
-        return render_template('main_page.html', form=form)
-    url_map.save()
     return render_template('main_page.html', url=url_map, form=form)
 
 
